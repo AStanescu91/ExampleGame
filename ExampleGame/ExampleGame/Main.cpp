@@ -11,7 +11,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	RegisterClass(&wndClass);
 
-	HWND hWnd = CreateWindow("Window", "Hello World", WS_OVERLAPPED | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hInstance, 0);
+	HWND hWnd = CreateWindow("Window", "Hello World", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hInstance, 0);
 
 	MSG msg = {};
 	while (GetMessage(&msg, 0, 0, 0)) {
