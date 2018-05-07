@@ -1,6 +1,6 @@
 #include "Window.h"
 
-Window::Window(HINSTANCE hInstance, UINT width, UINT height, const char *title) {
+Window::Window(HINSTANCE hInstance, UINT width, UINT height, const char *className, const char *title) {
 	this->mWidth = width;
 	this->mHeight = height;
 	this->mTitle = title;
@@ -34,7 +34,7 @@ bool Window::init(HINSTANCE hInstance) {
 	WNDCLASS wndClass = {};
 	wndClass.hInstance = hInstance;
 	wndClass.lpfnWndProc = StaticWndProc;
-	wndClass.lpszClassName = "Window";
+	wndClass.lpszClassName = this->mTitle;
 	wndClass.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
 	SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)this);
 
@@ -42,7 +42,7 @@ bool Window::init(HINSTANCE hInstance) {
 		return false;
 	}
 
-	this->hWnd = CreateWindow("Window", this->mTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, this);
+	this->hWnd = CreateWindow(this->mTitle, this->mTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, this);
 	if (this->hWnd == NULL) {
 		return false;
 	}
