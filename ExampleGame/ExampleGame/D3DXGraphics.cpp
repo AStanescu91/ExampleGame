@@ -34,12 +34,21 @@ bool D3DXGraphics::InitD3D(HWND hWnd)
 	scd.Windowed = TRUE;
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL, D3D11_SDK_VERSION, &scd, &mSwapChain, &mDev, NULL, &mDevCon);
+	HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL, D3D11_SDK_VERSION, &scd, &mSwapChain, &mDev, NULL, &mDevCon);
+	if (res != S_OK)
+	{
+		return false;
+	}
 
 	ID3D11Texture2D *pBackBuffer;
 	mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&pBackBuffer);
 	mDev->CreateRenderTargetView(pBackBuffer, NULL, &mBackBuffer);
 	pBackBuffer->Release();
+
+	if (mBackBuffer == 0)
+	{
+		return false;
+	}
 
 	mDevCon->OMSetRenderTargets(1, &mBackBuffer, NULL);
 
@@ -110,8 +119,8 @@ void D3DXGraphics::InitPipeline()
 {
 	// load and compile the two shaders
 	
-	const char *VSHADERPATH = "C:\\Users\\Alex\\source\\repos\\ExampleGame\\ExampleGame\\Debug\\VShader.cso";
-	const char *PSHADERPATH = "C:\\Users\\Alex\\source\\repos\\ExampleGame\\ExampleGame\\Debug\\PShader.cso";
+	const char *VSHADERPATH = "VShader.cso";
+	const char *PSHADERPATH = "PShader.cso";
 
 	unsigned char *vShader = 0;
 	unsigned char *pShader = 0;
