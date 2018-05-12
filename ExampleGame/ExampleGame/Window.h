@@ -10,7 +10,7 @@ class Window {
 	const char *mClassName;
 	HWND hWnd;
 
-	bool init(HINSTANCE hInstance);
+	bool Init(HINSTANCE hInstance);
 
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -20,7 +20,7 @@ class Window {
 
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-		inline HWND getHWnd() { return this->hWnd; }
+		inline HWND GetHWnd() { return this->hWnd; }
 
 		~Window();
 };

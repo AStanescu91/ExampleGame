@@ -6,7 +6,7 @@ Window::Window(HINSTANCE hInstance, UINT width, UINT height, const char *classNa
 	this->mTitle = title;
 	this->mClassName = className;
 
-	init(hInstance);
+	Init(hInstance);
 }
 
 LRESULT CALLBACK Window::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -31,7 +31,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-bool Window::init(HINSTANCE hInstance) {
+bool Window::Init(HINSTANCE hInstance) {
 	WNDCLASS wndClass = {};
 	wndClass.hInstance = hInstance;
 	wndClass.lpfnWndProc = StaticWndProc;
