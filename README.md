@@ -2,4 +2,4 @@
 
 Goal: Starting from scratch using DX and OpenGL libraries. Learning along the way.
 
-![alt text](https://raw.githubusercontent.com/shizzycs/ExampleGame/master/latest.jpg)
+![alt text](https://github.com/shizzycs/ExampleGame/blob/DirectXTriangle/ExampleGame/latest.png)
