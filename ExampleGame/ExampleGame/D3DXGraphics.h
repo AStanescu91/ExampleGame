@@ -1,19 +1,21 @@
 #ifndef D3DXGRAPHICS_H_DEFINED
 #define D3DXGRAPHICS_H_DEFINED
 
+#include "IGraphics.h"
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <vector>
 
 using namespace DirectX;
 
-class D3DXGraphics {
+class D3DXGraphics : public IGraphics {
 	struct VERTEX 
 	{
 		FLOAT X, Y, Z;
 		XMVECTOR color;
 	};
 
+	HWND hWnd;
 	ID3D11Device *mDev;
 	ID3D11DeviceContext *mDevCon;
 	IDXGISwapChain *mSwapChain;
@@ -23,18 +25,15 @@ class D3DXGraphics {
 	ID3D11PixelShader *mPShader;
 	ID3D11Buffer *mVBuffer;
 
-	int ReadData(const char *fileName, unsigned char *&buf);
-
-	bool InitD3D(HWND hWnd);
-	void RenderFrame();
-	void CleanD3D();
-	void InitGraphics();
-	void InitPipeline();
+	bool initD3D(HWND hWnd);
+	void initGraphics();
+	void initPipeline();
 
 	public:
-		D3DXGraphics(HWND hWnd);
+		D3DXGraphics();
 
-		void Render();
+		void render();
+		void setHWnd(HWND hWnd);
 
 		~D3DXGraphics();
 };

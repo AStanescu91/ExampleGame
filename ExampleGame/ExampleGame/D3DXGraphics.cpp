@@ -1,4 +1,5 @@
 #include "D3DXGraphics.h"
+#include "Utils.h"
 #include <DirectXMath.h>
 #include <vector>
 #include <fstream>
@@ -8,11 +9,9 @@
 using namespace DirectX;
 using namespace std;
 
-D3DXGraphics::D3DXGraphics(HWND hWnd) {
-	InitD3D(hWnd);
-}
+D3DXGraphics::D3DXGraphics() {}
 
-bool D3DXGraphics::InitD3D(HWND hWnd) 
+bool D3DXGraphics::initD3D(HWND hWnd) 
 {
 	LPRECT winBounds = new RECT();
 	if (!GetWindowRect(hWnd, winBounds)) 
@@ -60,13 +59,13 @@ bool D3DXGraphics::InitD3D(HWND hWnd)
 
 	mDevCon->RSSetViewports(1, &viewport);
 
-	InitGraphics();
-	InitPipeline();
+	initGraphics();
+	initPipeline();
 
 	return true;
 }
 
-void D3DXGraphics::InitGraphics()
+void D3DXGraphics::initGraphics()
 {
 	// create a triangle using the VERTEX struct
 	VERTEX OurVertices[] =
@@ -93,29 +92,7 @@ void D3DXGraphics::InitGraphics()
 	mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
 }
 
-int D3DXGraphics::ReadData(const char *fileName, unsigned char *&buf) {
-	const char *MODE = "rb";
-	FILE *pFile = 0;
-	fopen_s(&pFile, fileName, MODE);
-
-	fseek(pFile, 0, SEEK_END);
-	long fSize = ftell(pFile);
-	fseek(pFile, 0, SEEK_SET);
-
-	buf = (unsigned char *)malloc(fSize);
-
-	int numRead = 0;
-	while (numRead != fSize)
-	{
-		numRead = fread(&buf[numRead], 1, fSize, pFile);
-	}
-
-	fclose(pFile);
-
-	return fSize;
-};
-
-void D3DXGraphics::InitPipeline()
+void D3DXGraphics::initPipeline()
 {
 	// load and compile the two shaders
 	
@@ -125,8 +102,8 @@ void D3DXGraphics::InitPipeline()
 	unsigned char *vShader = 0;
 	unsigned char *pShader = 0;
 
-	int vShaderSize = ReadData(VSHADERPATH, vShader);
-	int pShaderSize = ReadData(PSHADERPATH, pShader);
+	int vShaderSize = Utils::readData(VSHADERPATH, vShader);
+	int pShaderSize = Utils::readData(PSHADERPATH, pShader);
 
 	// encapsulate both shaders into shader objects
 	mDev->CreateVertexShader((void *)&vShader[0], vShaderSize, NULL, &mVShader);
@@ -147,7 +124,7 @@ void D3DXGraphics::InitPipeline()
 	mDevCon->IASetInputLayout(mLayout);
 }
 
-void D3DXGraphics::Render() 
+void D3DXGraphics::render() 
 {
 	// clear the back buffer to a deep blue
 	mDevCon->ClearRenderTargetView(mBackBuffer, new float[4] { 0.0f, 0.2f, 0.4f, 1.0f } );
@@ -165,6 +142,12 @@ void D3DXGraphics::Render()
 
 	// switch the back buffer and the front buffer
 	mSwapChain->Present(0, 0);
+}
+
+void D3DXGraphics::setHWnd(HWND hWnd)
+{
+	this->hWnd = hWnd;	
+	initD3D(hWnd);
 }
 
 D3DXGraphics::~D3DXGraphics() {
