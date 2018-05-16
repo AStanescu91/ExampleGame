@@ -22,6 +22,31 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	int width = winBounds->bottom - winBounds->top;
 	int height = winBounds->right - winBounds->left;
 
+	if (!initDeviceAndSwapChain(width, height))
+	{
+		return false;
+	}
+
+	if (!initRenderTarget())
+	{
+		return false;
+	}
+
+	D3D11_VIEWPORT viewport = getViewport(width, height);
+	mDevCon->RSSetViewports(1, &viewport);
+
+	initGraphics();
+
+	if (!initShaders())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool D3DXGraphics::initDeviceAndSwapChain(int width, int height)
+{
 	DXGI_SWAP_CHAIN_DESC scd = {};
 	scd.BufferCount = 1;
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -38,7 +63,11 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	{
 		return false;
 	}
+	return true;
+}
 
+bool D3DXGraphics::initRenderTarget()
+{
 	ID3D11Texture2D *pBackBuffer;
 	mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&pBackBuffer);
 	mDev->CreateRenderTargetView(pBackBuffer, NULL, &mBackBuffer);
@@ -50,19 +79,17 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	}
 
 	mDevCon->OMSetRenderTargets(1, &mBackBuffer, NULL);
+	return true;
+}
 
+D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
+{
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.Width = width;
 	viewport.Height = height;
-
-	mDevCon->RSSetViewports(1, &viewport);
-
-	initGraphics();
-	initPipeline();
-
-	return true;
+	return viewport;
 }
 
 void D3DXGraphics::initGraphics()
@@ -92,7 +119,7 @@ void D3DXGraphics::initGraphics()
 	mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
 }
 
-void D3DXGraphics::initPipeline()
+bool D3DXGraphics::initShaders()
 {
 	// load and compile the two shaders
 	
@@ -105,6 +132,9 @@ void D3DXGraphics::initPipeline()
 	int vShaderSize = Utils::readData(VSHADERPATH, vShader);
 	int pShaderSize = Utils::readData(PSHADERPATH, pShader);
 
+	if (vShader == 0 || pShader == 0)
+		return false;
+
 	// encapsulate both shaders into shader objects
 	mDev->CreateVertexShader((void *)&vShader[0], vShaderSize, NULL, &mVShader);
 	mDev->CreatePixelShader((void *)&pShader[0], pShaderSize, NULL, &mPShader);
@@ -113,6 +143,13 @@ void D3DXGraphics::initPipeline()
 	mDevCon->VSSetShader(mVShader, 0, 0);
 	mDevCon->PSSetShader(mPShader, 0, 0);
 
+	createInputLayout(vShader, vShaderSize);
+
+	return true;
+}
+
+void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
+{
 	// create the input layout object
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
@@ -120,7 +157,7 @@ void D3DXGraphics::initPipeline()
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	mDev->CreateInputLayout(ied, 2, vShader, vShaderSize, &mLayout);
+	this->mDev->CreateInputLayout(ied, 2, vShader, vShaderSize, &mLayout);
 	mDevCon->IASetInputLayout(mLayout);
 }
 

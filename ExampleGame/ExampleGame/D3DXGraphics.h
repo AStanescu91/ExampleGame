@@ -26,8 +26,12 @@ class D3DXGraphics : public IGraphics {
 	ID3D11Buffer *mVBuffer;
 
 	bool initD3D(HWND hWnd);
+	bool initDeviceAndSwapChain(int width, int height);
+	bool initRenderTarget();
+	void createInputLayout(unsigned char *vShader, int vShaderSize);
 	void initGraphics();
-	void initPipeline();
+	bool initShaders();
+	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
 		D3DXGraphics();
