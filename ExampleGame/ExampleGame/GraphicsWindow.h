@@ -10,6 +10,7 @@ public:
 	GraphicsWindow(HINSTANCE hInstance, UINT width, UINT height, const char *className, const char *title, IGraphics *graphics);
 	GraphicsWindow(HINSTANCE hInstance, const char *className, const char *title, IGraphics *graphics);
 
+	void updateScene(VERTEX *vertices, int count);
 	void render();
 
 	~GraphicsWindow();

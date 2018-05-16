@@ -10,6 +10,11 @@ GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, UINT width, UINT height, con
 GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, const char *className, const char *title, IGraphics *graphics) 
 	: GraphicsWindow(hInstance, 800, 600, className, title, graphics) {}
 
+void GraphicsWindow::updateScene(VERTEX *vertices, int count)
+{
+	this->graphics->updateScene(vertices, count);
+}
+
 void GraphicsWindow::render()
 {
 	this->graphics->render();

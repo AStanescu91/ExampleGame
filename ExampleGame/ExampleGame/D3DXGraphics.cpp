@@ -35,8 +35,6 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	D3D11_VIEWPORT viewport = getViewport(width, height);
 	mDevCon->RSSetViewports(1, &viewport);
 
-	initGraphics();
-
 	if (!initShaders())
 	{
 		return false;
@@ -92,31 +90,26 @@ D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
 	return viewport;
 }
 
-void D3DXGraphics::initGraphics()
+void D3DXGraphics::initGraphics(VERTEX *vertices, int count)
 {
-	// create a triangle using the VERTEX struct
-	VERTEX OurVertices[] =
+	if (vertices != 0) 
 	{
-		{ 0.0f, 0.5f, 0.0f, XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f ) },
-		{ 0.45f, -0.5, 0.0f, XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f ) },
-		{ -0.45f, -0.5f, 0.0f, XMVectorSet( 0.0f, 0.0f, 1.0f, 1.0f ) }
-	};
+		// create the vertex buffer
+		D3D11_BUFFER_DESC bd;
+		ZeroMemory(&bd, sizeof(bd));
 
-	// create the vertex buffer
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
+		bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
+		bd.ByteWidth = sizeof(VERTEX) * count;             // size is the VERTEX struct * 3
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
+		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
 
-	bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
-	bd.ByteWidth = sizeof(VERTEX) * 3;             // size is the VERTEX struct * 3
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
-
-	mDev->CreateBuffer(&bd, NULL, &mVBuffer);       // create the buffer
-												   // copy the vertices into the buffer
-	D3D11_MAPPED_SUBRESOURCE ms;
-	mDevCon->Map(mVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-	memcpy(ms.pData, OurVertices, sizeof(OurVertices));                 // copy the data
-	mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
+		mDev->CreateBuffer(&bd, NULL, &mVBuffer);       // create the buffer
+														// copy the vertices into the buffer
+		D3D11_MAPPED_SUBRESOURCE ms;
+		mDevCon->Map(mVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+		memcpy(ms.pData, vertices, sizeof(VERTEX) * count);                 // copy the data
+		mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
+	}
 }
 
 bool D3DXGraphics::initShaders()
@@ -161,6 +154,11 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
+void D3DXGraphics::updateScene(VERTEX *vertices, int count)
+{
+	this->initGraphics(vertices, count);
+}
+
 void D3DXGraphics::render() 
 {
 	// clear the back buffer to a deep blue
@@ -172,7 +170,7 @@ void D3DXGraphics::render()
 	mDevCon->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 
 	// select which primtive type we are using
-	mDevCon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mDevCon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	// draw the vertex buffer to the back buffer
 	mDevCon->Draw(3, 0);

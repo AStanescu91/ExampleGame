@@ -9,12 +9,6 @@
 using namespace DirectX;
 
 class D3DXGraphics : public IGraphics {
-	struct VERTEX 
-	{
-		FLOAT X, Y, Z;
-		XMVECTOR color;
-	};
-
 	HWND hWnd;
 	ID3D11Device *mDev;
 	ID3D11DeviceContext *mDevCon;
@@ -29,13 +23,14 @@ class D3DXGraphics : public IGraphics {
 	bool initDeviceAndSwapChain(int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
-	void initGraphics();
+	void initGraphics(VERTEX *vertices, int count);
 	bool initShaders();
 	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
 		D3DXGraphics();
 
+		void updateScene(VERTEX *vertices, int count);
 		void render();
 		void setHWnd(HWND hWnd);
 

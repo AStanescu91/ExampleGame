@@ -16,10 +16,33 @@ IGraphics *getGraphicsObject(std::string name)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine, int nCmdShow) {
 	GraphicsWindow *window = new GraphicsWindow(hInstance, "WindowOne", "One", getGraphicsObject("d3dx"));
+	GraphicsWindow *window2 = new GraphicsWindow(hInstance, "WindowTwo", "Two", getGraphicsObject("d3dx"));
+
+	// create a triangle using the VERTEX struct
+	VERTEX vertices[] =
+	{
+		{ -0.5f, 0.5f, 0.0f, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ 0.5f, 0.5, 0.0f, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ 0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) }
+		//{ -0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) }
+	};
+
+	// create a triangle using the VERTEX struct
+	VERTEX vertices2[] =
+	{
+		//{ -0.5f, 0.5f, 0.0f, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ 0.5f, 0.5, 0.0f, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ 0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ -0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f) }
+	};
 
 	MSG msg = {};
 	while (GetMessage(&msg, 0, 0, 0)) {
+		window->updateScene(vertices, 3);
+		window2->updateScene(vertices2, 3);
+
 		window->render();
+		window2->render();
 
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
