@@ -32,13 +32,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 		0, 2, 3
 	};
 
+	float angle = 0.0f;
+
 	MSG msg = {};
-	while (GetMessage(&msg, 0, 0, 0)) {
-		window->updateScene(vertices, indices, 4, 6);
+	while (TRUE) {
+		angle += 0.001f;
+		window->updateScene(vertices, indices, 4, 6, angle);
 		window->render();
 
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
 	return 0;

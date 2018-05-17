@@ -174,21 +174,8 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
-void D3DXGraphics::createConstantBuffer()
+void D3DXGraphics::createConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 {
-	RECT rect = {};
-	GetClientRect(this->hWnd, &rect);
-
-	float width = rect.right - rect.left;
-	float height = rect.bottom - rect.top;
-
-	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
-	XMMATRIX wvpMatrix = translate * viewProj;
-
-	VS_CONSTANT_BUFFER vsConstData = {};
-	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
-
 	// Fill in a buffer description.
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(VS_CONSTANT_BUFFER);
@@ -209,10 +196,26 @@ void D3DXGraphics::createConstantBuffer()
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount)
+void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount, float angle)
 {
+	RECT rect = {};
+	GetClientRect(this->hWnd, &rect);
+
+	float width = rect.right - rect.left;
+	float height = rect.bottom - rect.top;
+
+	XMMATRIX rotate = XMMatrixRotationZ(angle);
+	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+
+	XMMATRIX world = rotate * translate;
+	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
+	XMMATRIX wvpMatrix = world * viewProj;
+
+	VS_CONSTANT_BUFFER vsConstData = {};
+	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
+
 	this->initGraphics(vertices, indices, vCount, iCount);
-	this->createConstantBuffer();
+	this->createConstantBuffer(vsConstData);
 	this->mICount = iCount;
 }
 

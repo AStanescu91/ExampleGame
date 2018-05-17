@@ -32,7 +32,7 @@ class D3DXGraphics : public IGraphics {
 	bool initDeviceAndSwapChain(int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
-	void createConstantBuffer();
+	void createConstantBuffer(VS_CONSTANT_BUFFER vsConstData);
 	void initGraphics(VERTEX *vertices, UINT *indices, int vCount, int iCount);
 	bool initShaders();
 	D3D11_VIEWPORT getViewport(int width, int height);
@@ -40,7 +40,7 @@ class D3DXGraphics : public IGraphics {
 	public:
 		D3DXGraphics();
 
-		void updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount);
+		void updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount, float angle);
 		void render();
 		void setHWnd(HWND hWnd);
 
