@@ -15,7 +15,7 @@ typedef struct VERTEX
 class IGraphics 
 {
 	public:	
-		virtual void updateScene(VERTEX *vertices, int count) = 0;
+		virtual void updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount) = 0;
 		virtual void render() = 0;
 		virtual void setHWnd(HWND hWnd) = 0;
 };

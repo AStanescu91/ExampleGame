@@ -18,19 +18,22 @@ class D3DXGraphics : public IGraphics {
 	ID3D11VertexShader *mVShader;
 	ID3D11PixelShader *mPShader;
 	ID3D11Buffer *mVBuffer;
+	ID3D11Buffer *mIBuffer;
+
+	int mICount;
 
 	bool initD3D(HWND hWnd);
 	bool initDeviceAndSwapChain(int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
-	void initGraphics(VERTEX *vertices, int count);
+	void initGraphics(VERTEX *vertices, UINT *indices, int vCount, int iCount);
 	bool initShaders();
 	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
 		D3DXGraphics();
 
-		void updateScene(VERTEX *vertices, int count);
+		void updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount);
 		void render();
 		void setHWnd(HWND hWnd);
 

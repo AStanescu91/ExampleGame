@@ -21,14 +21,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 	VERTEX vertices[] =
 	{
 		{ -0.5f, 0.5f, 0.0f, XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ 0.5f, 0.5, 0.0f, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ 0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) }
-		//{ -0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) }
+		{ 0.5f, 0.5f, 0.0f, XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ 0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ -0.5f, -0.5f, 0.0f, XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f) }
+	};
+
+	UINT indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
 	};
 
 	MSG msg = {};
 	while (GetMessage(&msg, 0, 0, 0)) {
-		window->updateScene(vertices, 3);
+		window->updateScene(vertices, indices, 4, 6);
 		window->render();
 
 		TranslateMessage(&msg);
