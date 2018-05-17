@@ -174,9 +174,45 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
+void D3DXGraphics::createConstantBuffer()
+{
+	RECT rect = {};
+	GetClientRect(this->hWnd, &rect);
+
+	float width = rect.right - rect.left;
+	float height = rect.bottom - rect.top;
+
+	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
+	XMMATRIX wvpMatrix = translate * viewProj;
+
+	VS_CONSTANT_BUFFER vsConstData = {};
+	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
+
+	// Fill in a buffer description.
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(VS_CONSTANT_BUFFER);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	// Fill in the subresource data.
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &vsConstData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	// Create the buffer.
+	mDev->CreateBuffer(&cbDesc, &InitData, &mCBuffer);
+}
+
+//Instead of vbuffer, ibuffer, we pass in list of objects and their state
 void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount)
 {
 	this->initGraphics(vertices, indices, vCount, iCount);
+	this->createConstantBuffer();
 	this->mICount = iCount;
 }
 
@@ -190,6 +226,7 @@ void D3DXGraphics::render()
 	UINT offset = 0;
 	mDevCon->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 	mDevCon->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
+	mDevCon->VSSetConstantBuffers(0, 1, &mCBuffer);
 
 	// select which primtive type we are using
 	mDevCon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -9,6 +9,11 @@
 using namespace DirectX;
 
 class D3DXGraphics : public IGraphics {
+	struct VS_CONSTANT_BUFFER
+	{
+		XMFLOAT4X4 worldViewProj;
+	};
+
 	HWND hWnd;
 	ID3D11Device *mDev;
 	ID3D11DeviceContext *mDevCon;
@@ -19,6 +24,7 @@ class D3DXGraphics : public IGraphics {
 	ID3D11PixelShader *mPShader;
 	ID3D11Buffer *mVBuffer;
 	ID3D11Buffer *mIBuffer;
+	ID3D11Buffer *mCBuffer;
 
 	int mICount;
 
@@ -26,6 +32,7 @@ class D3DXGraphics : public IGraphics {
 	bool initDeviceAndSwapChain(int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
+	void createConstantBuffer();
 	void initGraphics(VERTEX *vertices, UINT *indices, int vCount, int iCount);
 	bool initShaders();
 	D3D11_VIEWPORT getViewport(int width, int height);
