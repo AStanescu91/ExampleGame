@@ -207,9 +207,10 @@ void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int 
 	XMMATRIX rotate = XMMatrixRotationZ(angle);
 	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
 
-	XMMATRIX world = rotate * translate;
+	//XMMATRIX world = rotate * translate;
 	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
-	XMMATRIX wvpMatrix = world * viewProj;
+	XMMATRIX world = translate * rotate;
+	XMMATRIX wvpMatrix = XMMatrixTranspose(world * viewProj);
 
 	VS_CONSTANT_BUFFER vsConstData = {};
 	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
