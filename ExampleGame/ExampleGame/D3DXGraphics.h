@@ -14,6 +14,8 @@ class D3DXGraphics : public IGraphics {
 		XMFLOAT4X4 worldViewProj;
 	};
 
+	MESH_DATA *mBufferData;
+
 	HWND hWnd;
 	ID3D11Device *mDev;
 	ID3D11DeviceContext *mDevCon;
@@ -32,15 +34,16 @@ class D3DXGraphics : public IGraphics {
 	bool initDeviceAndSwapChain(int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
-	void createConstantBuffer(VS_CONSTANT_BUFFER vsConstData);
-	void initGraphics(VERTEX *vertices, UINT *indices, int vCount, int iCount);
+	void updateBuffers(MESH_DATA *bufferData);
 	bool initShaders();
+	void initConstantBuffer();
+	void updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData);
 	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
 		D3DXGraphics();
 
-		void updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount, float angle);
+		void updateScene(MESH_DATA *bufferData, float angle);
 		void render();
 		void setHWnd(HWND hWnd);
 

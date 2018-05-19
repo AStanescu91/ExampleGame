@@ -43,6 +43,8 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 		return false;
 	}
 
+	initConstantBuffer();
+
 	return true;
 }
 
@@ -93,43 +95,45 @@ D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
 	return viewport;
 }
 
-void D3DXGraphics::initGraphics(VERTEX *vertices, UINT *indices, int vCount, int iCount)
+void D3DXGraphics::updateBuffers(MESH_DATA *bufferData)
 {
-	if (vertices != 0 && indices != 0) 
-	{
-		// Fill in a buffer description.
-		D3D11_BUFFER_DESC bufferDesc;
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = sizeof(UINT) * iCount;
-		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		bufferDesc.CPUAccessFlags = 0;
-		bufferDesc.MiscFlags = 0;
+	mBufferData = bufferData;
+	if (this->mVBuffer != 0)
+		this->mVBuffer->Release();
 
-		// Define the resource data.
-		D3D11_SUBRESOURCE_DATA InitData;
-		InitData.pSysMem = indices;
-		InitData.SysMemPitch = 0;
-		InitData.SysMemSlicePitch = 0;
+	D3D11_BUFFER_DESC vBufferDesc = {};
+	vBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vBufferDesc.ByteWidth = sizeof(VERTEX) * bufferData->mVCount;
+	vBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		// Create the buffer with the device.
-		mDev->CreateBuffer(&bufferDesc, &InitData, &mIBuffer);
+	// Define the resource data.
+	D3D11_SUBRESOURCE_DATA vInitData = {};
+	vInitData.pSysMem = bufferData->mVertices;
+	vInitData.SysMemPitch = 0;
+	vInitData.SysMemSlicePitch = 0;
 
-		// create the vertex buffer
-		D3D11_BUFFER_DESC bd;
-		ZeroMemory(&bd, sizeof(bd));
+	mDev->CreateBuffer(&vBufferDesc, &vInitData, &mVBuffer);
 
-		bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
-		bd.ByteWidth = sizeof(VERTEX) * vCount;             // size is the VERTEX struct * 3
-		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
-		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
+	if (this->mIBuffer != 0)
+		this->mIBuffer->Release();
 
-		mDev->CreateBuffer(&bd, NULL, &mVBuffer);       // create the buffer
-														// copy the vertices into the buffer
-		D3D11_MAPPED_SUBRESOURCE ms;
-		mDevCon->Map(mVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-		memcpy(ms.pData, vertices, sizeof(VERTEX) * vCount);                 // copy the data
-		mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
-	}
+	// Fill in a buffer description.
+	D3D11_BUFFER_DESC iBufferDesc;
+	iBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	iBufferDesc.ByteWidth = sizeof(UINT) * bufferData->mICount;
+	iBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	iBufferDesc.CPUAccessFlags = 0;
+	iBufferDesc.MiscFlags = 0;
+
+	// Define the resource data.
+	D3D11_SUBRESOURCE_DATA iInitData;
+	iInitData.pSysMem = bufferData->mIndices;
+	iInitData.SysMemPitch = 0;
+	iInitData.SysMemSlicePitch = 0;
+
+	// Create the buffer with the device.
+	mDev->CreateBuffer(&iBufferDesc, &iInitData, &mIBuffer);
 }
 
 bool D3DXGraphics::initShaders()
@@ -174,7 +178,7 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
-void D3DXGraphics::createConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
+void D3DXGraphics::initConstantBuffer()
 {
 	// Fill in a buffer description.
 	D3D11_BUFFER_DESC cbDesc;
@@ -185,18 +189,20 @@ void D3DXGraphics::createConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 	cbDesc.MiscFlags = 0;
 	cbDesc.StructureByteStride = 0;
 
-	// Fill in the subresource data.
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &vsConstData;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
 	// Create the buffer.
-	mDev->CreateBuffer(&cbDesc, &InitData, &mCBuffer);
+	mDev->CreateBuffer(&cbDesc, 0, &mCBuffer);
+}
+
+void D3DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
+{
+	D3D11_MAPPED_SUBRESOURCE ms;
+	mDevCon->Map(mCBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, &vsConstData, sizeof(VS_CONSTANT_BUFFER));
+	mDevCon->Unmap(mCBuffer, NULL);
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int iCount, float angle)
+void D3DXGraphics::updateScene(MESH_DATA *bufferData, float angle)
 {
 	RECT rect = {};
 	GetClientRect(this->hWnd, &rect);
@@ -204,20 +210,21 @@ void D3DXGraphics::updateScene(VERTEX *vertices, UINT *indices, int vCount, int 
 	float width = rect.right - rect.left;
 	float height = rect.bottom - rect.top;
 
-	XMMATRIX rotate = XMMatrixRotationZ(angle);
+	XMMATRIX rotate = XMMatrixRotationY(angle);
 	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
 
-	//XMMATRIX world = rotate * translate;
 	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
-	XMMATRIX world = translate * rotate;
+	XMMATRIX world = rotate * translate;
 	XMMATRIX wvpMatrix = XMMatrixTranspose(world * viewProj);
 
 	VS_CONSTANT_BUFFER vsConstData = {};
 	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
+	
+	if (bufferData != this->mBufferData)
+		this->updateBuffers(bufferData);
 
-	this->initGraphics(vertices, indices, vCount, iCount);
-	this->createConstantBuffer(vsConstData);
-	this->mICount = iCount;
+	this->updateConstantBuffer(vsConstData);
+	this->mICount = bufferData->mICount;
 }
 
 void D3DXGraphics::render() 
