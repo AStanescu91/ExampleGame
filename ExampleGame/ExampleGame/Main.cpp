@@ -86,10 +86,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	float angle = 0.0f;
 
+	MESH_DATA *data = new MESH_DATA(vertices, indices, 24, 36);
+
 	MSG msg = {};
 	while (TRUE) {
 		angle += 0.0001f;
-		window->updateScene(new MESH_DATA(vertices, indices, 24, 36), angle);
+		window->updateScene(data, angle);
 		window->render();
 
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {

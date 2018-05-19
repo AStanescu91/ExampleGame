@@ -210,7 +210,9 @@ void D3DXGraphics::updateScene(MESH_DATA *bufferData, float angle)
 	float width = rect.right - rect.left;
 	float height = rect.bottom - rect.top;
 
-	XMMATRIX rotate = XMMatrixRotationY(angle);
+	
+	XMMATRIX rotate = XMMatrixRotationRollPitchYaw(angle, angle, angle);
+//	XMMATRIX rotate = XMMatrixRotationY(angle);
 	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
 
 	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
@@ -227,10 +229,12 @@ void D3DXGraphics::updateScene(MESH_DATA *bufferData, float angle)
 	this->mICount = bufferData->mICount;
 }
 
+float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
+
 void D3DXGraphics::render() 
 {
 	// clear the back buffer to a deep blue
-	mDevCon->ClearRenderTargetView(mBackBuffer, new float[4] { 0.0f, 0.2f, 0.4f, 1.0f } );
+	mDevCon->ClearRenderTargetView(mBackBuffer, backColor );
 
 	// select which vertex buffer to display
 	UINT stride = sizeof(VERTEX);
