@@ -9,7 +9,10 @@
 using namespace DirectX;
 using namespace std;
 
-D3DXGraphics::D3DXGraphics() {}
+D3DXGraphics::D3DXGraphics() 
+{
+	this->mICount = 0;
+}
 
 bool D3DXGraphics::initD3D(HWND hWnd) 
 {
@@ -39,6 +42,8 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	{
 		return false;
 	}
+
+	initConstantBuffer();
 
 	return true;
 }
@@ -90,26 +95,45 @@ D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
 	return viewport;
 }
 
-void D3DXGraphics::initGraphics(VERTEX *vertices, int count)
+void D3DXGraphics::updateBuffers(MESH_DATA *bufferData)
 {
-	if (vertices != 0) 
-	{
-		// create the vertex buffer
-		D3D11_BUFFER_DESC bd;
-		ZeroMemory(&bd, sizeof(bd));
+	mBufferData = bufferData;
+	if (this->mVBuffer != 0)
+		this->mVBuffer->Release();
 
-		bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
-		bd.ByteWidth = sizeof(VERTEX) * count;             // size is the VERTEX struct * 3
-		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
-		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
+	D3D11_BUFFER_DESC vBufferDesc = {};
+	vBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vBufferDesc.ByteWidth = sizeof(VERTEX) * bufferData->mVCount;
+	vBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		mDev->CreateBuffer(&bd, NULL, &mVBuffer);       // create the buffer
-														// copy the vertices into the buffer
-		D3D11_MAPPED_SUBRESOURCE ms;
-		mDevCon->Map(mVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-		memcpy(ms.pData, vertices, sizeof(VERTEX) * count);                 // copy the data
-		mDevCon->Unmap(mVBuffer, NULL);                                      // unmap the buffer
-	}
+	// Define the resource data.
+	D3D11_SUBRESOURCE_DATA vInitData = {};
+	vInitData.pSysMem = bufferData->mVertices;
+	vInitData.SysMemPitch = 0;
+	vInitData.SysMemSlicePitch = 0;
+
+	mDev->CreateBuffer(&vBufferDesc, &vInitData, &mVBuffer);
+
+	if (this->mIBuffer != 0)
+		this->mIBuffer->Release();
+
+	// Fill in a buffer description.
+	D3D11_BUFFER_DESC iBufferDesc;
+	iBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	iBufferDesc.ByteWidth = sizeof(UINT) * bufferData->mICount;
+	iBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	iBufferDesc.CPUAccessFlags = 0;
+	iBufferDesc.MiscFlags = 0;
+
+	// Define the resource data.
+	D3D11_SUBRESOURCE_DATA iInitData;
+	iInitData.pSysMem = bufferData->mIndices;
+	iInitData.SysMemPitch = 0;
+	iInitData.SysMemSlicePitch = 0;
+
+	// Create the buffer with the device.
+	mDev->CreateBuffer(&iBufferDesc, &iInitData, &mIBuffer);
 }
 
 bool D3DXGraphics::initShaders()
@@ -154,9 +178,53 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
-void D3DXGraphics::updateScene(VERTEX *vertices, int count)
+void D3DXGraphics::initConstantBuffer()
 {
-	this->initGraphics(vertices, count);
+	// Fill in a buffer description.
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(VS_CONSTANT_BUFFER);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	// Create the buffer.
+	mDev->CreateBuffer(&cbDesc, 0, &mCBuffer);
+}
+
+void D3DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
+{
+	D3D11_MAPPED_SUBRESOURCE ms;
+	mDevCon->Map(mCBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, &vsConstData, sizeof(VS_CONSTANT_BUFFER));
+	mDevCon->Unmap(mCBuffer, NULL);
+}
+
+//Instead of vbuffer, ibuffer, we pass in list of objects and their state
+void D3DXGraphics::updateScene(MESH_DATA *bufferData, float angle)
+{
+	RECT rect = {};
+	GetClientRect(this->hWnd, &rect);
+
+	float width = rect.right - rect.left;
+	float height = rect.bottom - rect.top;
+
+	XMMATRIX rotate = XMMatrixRotationY(angle);
+	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
+
+	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
+	XMMATRIX world = rotate * translate;
+	XMMATRIX wvpMatrix = XMMatrixTranspose(world * viewProj);
+
+	VS_CONSTANT_BUFFER vsConstData = {};
+	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
+	
+	if (bufferData != this->mBufferData)
+		this->updateBuffers(bufferData);
+
+	this->updateConstantBuffer(vsConstData);
+	this->mICount = bufferData->mICount;
 }
 
 void D3DXGraphics::render() 
@@ -168,12 +236,14 @@ void D3DXGraphics::render()
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	mDevCon->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
+	mDevCon->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
+	mDevCon->VSSetConstantBuffers(0, 1, &mCBuffer);
 
 	// select which primtive type we are using
-	mDevCon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	mDevCon->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// draw the vertex buffer to the back buffer
-	mDevCon->Draw(3, 0);
+	mDevCon->DrawIndexed(this->mICount, 0, 0);
 
 	// switch the back buffer and the front buffer
 	mSwapChain->Present(0, 0);
