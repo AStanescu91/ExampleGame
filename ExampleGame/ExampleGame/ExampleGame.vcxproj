@@ -127,14 +127,19 @@
   <ItemGroup>
     <ClCompile Include="D3DXGraphics.cpp" />
     <ClCompile Include="GraphicsWindow.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="D3DXPerspectiveCamera.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="AbstractWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3DXGraphics.h" />
+    <ClInclude Include="ICamera.h" />
     <ClInclude Include="IGraphics.h" />
     <ClInclude Include="GraphicsWindow.h" />
+    <ClInclude Include="D3DXPerspectiveCamera.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="AbstractWindow.h" />
   </ItemGroup>

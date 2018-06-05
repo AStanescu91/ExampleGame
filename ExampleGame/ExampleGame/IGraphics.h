@@ -1,6 +1,7 @@
 #ifndef IGRAPHICS_H_DEFINED
 #define IGRAPHICS_H_DEFINED
 
+#include "ICamera.h"
 #include <Windows.h>
 #include <DirectXMath.h>
 
@@ -25,10 +26,16 @@ typedef struct MESH_DATA
 
 class IGraphics 
 {
+	protected:
+		ICamera *mCamera;
+
 	public:	
-		virtual void updateScene(MESH_DATA *bufferData, float angle) = 0;
+		IGraphics(ICamera *camera) : mCamera(camera) {}
+
+		virtual void updateScene(HWND hWnd, MESH_DATA *bufferData, float angle) = 0;
 		virtual void render() = 0;
-		virtual void setHWnd(HWND hWnd) = 0;
+
+		inline ICamera *getCamera() { return this->mCamera; }
 };
 
 #endif

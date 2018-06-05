@@ -1,23 +1,30 @@
 #include "GraphicsWindow.h"
+#include "InputManager.h"
 
-GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, UINT width, UINT height, const char *className, const char *title, IGraphics *graphics) 
+GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, UINT width, UINT height, const char *className, const char *title) 
 	: AbstractWindow(hInstance, width, height, className, title) 
 {
-	this->graphics = graphics;
-	this->graphics->setHWnd(this->getHWnd());
 }
 
-GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, const char *className, const char *title, IGraphics *graphics) 
-	: GraphicsWindow(hInstance, 800, 600, className, title, graphics) {}
+GraphicsWindow::GraphicsWindow(HINSTANCE hInstance, const char *className, const char *title) 
+	: GraphicsWindow(hInstance, 800, 600, className, title) {}
 
-void GraphicsWindow::updateScene(MESH_DATA *bufferData, float angle)
+void GraphicsWindow::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
 {
-	this->graphics->updateScene(bufferData, angle);
+	this->mGraphics->updateScene(hWnd, bufferData, angle);
 }
 
 void GraphicsWindow::render()
 {
-	this->graphics->render();
+	this->mGraphics->render();
+}
+
+LRESULT CALLBACK GraphicsWindow::wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	InputManager *manager = InputManager::getInstance();
+	manager->handleInput(wParam, message);	
+
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 GraphicsWindow::~GraphicsWindow() {}

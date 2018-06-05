@@ -9,9 +9,10 @@
 using namespace DirectX;
 using namespace std;
 
-D3DXGraphics::D3DXGraphics() 
+D3DXGraphics::D3DXGraphics(HWND hWnd, ICamera *camera) : IGraphics(camera)
 {
 	this->mICount = 0;
+	initD3D(hWnd);
 }
 
 bool D3DXGraphics::initD3D(HWND hWnd) 
@@ -25,7 +26,7 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	int width = winBounds->bottom - winBounds->top;
 	int height = winBounds->right - winBounds->left;
 
-	if (!initDeviceAndSwapChain(width, height))
+	if (!initDeviceAndSwapChain(hWnd, width, height))
 	{
 		return false;
 	}
@@ -48,7 +49,7 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	return true;
 }
 
-bool D3DXGraphics::initDeviceAndSwapChain(int width, int height)
+bool D3DXGraphics::initDeviceAndSwapChain(HWND hWnd, int width, int height)
 {
 	DXGI_SWAP_CHAIN_DESC scd = {};
 	scd.BufferCount = 1;
@@ -58,7 +59,7 @@ bool D3DXGraphics::initDeviceAndSwapChain(int width, int height)
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	scd.OutputWindow = hWnd;
 	scd.SampleDesc.Count = 4;
-	scd.Windowed = TRUE;
+	scd.Windowed = TRUE;	
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	HRESULT res = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL, D3D11_SDK_VERSION, &scd, &mSwapChain, &mDev, NULL, &mDevCon);
@@ -66,6 +67,7 @@ bool D3DXGraphics::initDeviceAndSwapChain(int width, int height)
 	{
 		return false;
 	}
+	
 	return true;
 }
 
@@ -201,32 +203,33 @@ void D3DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 	mDevCon->Unmap(mCBuffer, NULL);
 }
 
-//Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void D3DXGraphics::updateScene(MESH_DATA *bufferData, float angle)
+XMMATRIX D3DXGraphics::createWorldViewProj(float angle)
 {
-	RECT rect = {};
-	GetClientRect(this->hWnd, &rect);
+	float *camPos = this->mCamera->getPosition();
+	XMMATRIX rotate = DirectX::XMMatrixRotationZ(angle);
+	XMMATRIX world = DirectX::XMMatrixTranslation(camPos[0], camPos[1], camPos[2]);
+	world = rotate * world;
 
-	float width = rect.right - rect.left;
-	float height = rect.bottom - rect.top;
+	XMMATRIX viewProj = XMMATRIX(this->mCamera->getViewProjMatrix());
+	return DirectX::XMMatrixTranspose(world * viewProj);
+}
 
-	
-	XMMATRIX rotate = XMMatrixRotationRollPitchYaw(angle, angle, angle);
-//	XMMATRIX rotate = XMMatrixRotationY(angle);
-	XMMATRIX translate = XMMatrixTranslation(0.0f, 0.0f, 10.0f);
-
-	XMMATRIX viewProj = XMMatrixPerspectiveFovLH(70.0f, width / height, 1.0f, 100.0f);
-	XMMATRIX world = rotate * translate;
-	XMMATRIX wvpMatrix = XMMatrixTranspose(world * viewProj);
+//Instead of vbuffer, ibuffer, we pass in list of objects and their state
+void D3DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
+{	
+	XMMATRIX wvp = createWorldViewProj(angle);
 
 	VS_CONSTANT_BUFFER vsConstData = {};
-	XMStoreFloat4x4(&vsConstData.worldViewProj, wvpMatrix);
-	
-	if (bufferData != this->mBufferData)
-		this->updateBuffers(bufferData);
+	DirectX::XMStoreFloat4x4(&vsConstData.worldViewProj, wvp);
 
+	//update per object
 	this->updateConstantBuffer(vsConstData);
-	this->mICount = bufferData->mICount;
+
+	if (bufferData != this->mBufferData)
+	{
+		this->updateBuffers(bufferData);
+		this->mICount = bufferData->mICount;
+	}	
 }
 
 float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
@@ -234,7 +237,7 @@ float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
 void D3DXGraphics::render() 
 {
 	// clear the back buffer to a deep blue
-	mDevCon->ClearRenderTargetView(mBackBuffer, backColor );
+	mDevCon->ClearRenderTargetView(mBackBuffer, backColor);
 
 	// select which vertex buffer to display
 	UINT stride = sizeof(VERTEX);
@@ -251,12 +254,6 @@ void D3DXGraphics::render()
 
 	// switch the back buffer and the front buffer
 	mSwapChain->Present(0, 0);
-}
-
-void D3DXGraphics::setHWnd(HWND hWnd)
-{
-	this->hWnd = hWnd;	
-	initD3D(hWnd);
 }
 
 D3DXGraphics::~D3DXGraphics() {

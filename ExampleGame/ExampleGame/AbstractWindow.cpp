@@ -53,6 +53,11 @@ bool AbstractWindow::init(HINSTANCE hInstance) {
 		return false;
 	}
 
+	LPRECT bounds = new RECT();
+	GetClientRect(this->hWnd, bounds);
+	this->mWidth = bounds->right - bounds->left;
+	this->mHeight = bounds->bottom - bounds->top;
+
 	return true;
 }
 
