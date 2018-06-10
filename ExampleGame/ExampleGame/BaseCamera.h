@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-class ICamera
+class BaseCamera
 {
 	protected:
 		float *mPosition;

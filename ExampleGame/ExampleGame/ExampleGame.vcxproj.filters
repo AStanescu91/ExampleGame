@@ -1,66 +1,60 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{6a20001c-fe68-4913-814c-df5855f31259}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{118100d2-83c3-472b-8c43-0e50ff1b70ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{ee2b9f2f-254a-4d23-9335-1675578232a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="BaseWindow.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="D3DXGraphics.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DXGraphics.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DXCamera.cpp">
+      <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="AbstractWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DXPerspectiveCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InputManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="DXExampleFactory.cpp" />
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ExampleWindow.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3DXGraphics.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BaseWindow.h">
+      <Filter>Window</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BaseCamera.h">
+      <Filter>Camera</Filter>
     </ClInclude>
-    <ClInclude Include="AbstractWindow.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DXCamera.h">
+      <Filter>Camera</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsWindow.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BaseGraphics.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="IGraphics.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DXGraphics.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ICamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DXPerspectiveCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BaseExampleFactory.h" />
+    <ClInclude Include="DXExampleFactory.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="ExampleWindow.h">
+      <Filter>Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

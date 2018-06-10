@@ -1,42 +1,32 @@
-#include "GraphicsWindow.h"
-#include "D3DXGraphics.h"
-#include "IGraphics.h"
-#include "D3DXPerspectiveCamera.h"
+#include "BaseExampleFactory.h"
+#include "DXExampleFactory.h"
+#include "ExampleWindow.h"
 #include "InputManager.h"
-#include <map>
 #include <Windows.h>
 
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-typedef char (*INPUT_FUNC)();
-typedef void(*ACTION_FUNC)(int);
-
-std::map<int, ACTION_FUNC> actionMap;
-
-ICamera *getCameraObject(std::string name, int width, int height)
+BaseExampleFactory *&getFactory(std::string name)
 {
-	ICamera *cam = 0;
-	if (name._Equal("perspective"))
+	BaseExampleFactory *factory = 0;
+	if (name.compare("dx") == 0)
 	{
-		cam = new D3DXPerspectiveCamera(width, height);
+		factory = new DXExampleFactory();
 	}
-	return cam;
-}
-
-IGraphics *getGraphicsObject(std::string name, ICamera *camera, HWND hWnd)
-{
-	if (name._Equal("d3dx"))
-	{
-		return new D3DXGraphics(hWnd, camera);
-	}
-	return 0;
+	return factory;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine, int nCmdShow) {
-	GraphicsWindow *window = new GraphicsWindow(hInstance, "WindowOne", "One");
-	ICamera *camera = getCameraObject("perspective", window->getWidth(), window->getHeight());
+	ExampleWindow window = ExampleWindow(hInstance, "WindowOne", "One");
+	int windowWidth = window.getBounds().right - window.getBounds().left;
+	int windowHeight = window.getBounds().bottom - window.getBounds().top;
+
+	BaseExampleFactory *factory = getFactory("dx");
+
+	BaseGraphics *graphics = factory->createGraphics(window.getHWnd());
+	window.setGraphics(graphics);
+
+	BaseCamera *camera = factory->createCamera(windowWidth, windowHeight);
+	graphics->setCamera(camera);
 	camera->setPosition(0.0f, 0.0f, 10.0f);
-	IGraphics *graphics = getGraphicsObject("d3dx", camera, window->getHWnd());
-	window->setGraphics(graphics);
 
 	// create a triangle using the VERTEX struct
 	VERTEX vertices[] =
@@ -113,6 +103,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 	InputManager *manager = InputManager::getInstance();
 
 	while (TRUE) {
+		bool quitState = manager->getKeyState(VK_ESCAPE);
 		bool aState = manager->getKeyState('A');
 		bool dState = manager->getKeyState('D');
 		bool wState = manager->getKeyState('W');
@@ -121,6 +112,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 		bool spState = manager->getKeyState(VK_SPACE);
 
 		float *curPos = camera->getPosition();
+
+		if (quitState)
+		{
+			PostQuitMessage(0);
+		}
 
 		if (aState)
 		{
@@ -152,8 +148,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 			camera->setPosition(curPos[0], curPos[1] - 0.001f, curPos[2]);
 		}
 
-		window->updateScene(window->getHWnd(), data, angle);
-		window->render();
+		angle += 0.0001f;
+
+		window.updateScene(window.getHWnd(), data, angle);
+		window.render();
 
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);

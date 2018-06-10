@@ -8,10 +8,15 @@ class InputManager
 	static InputManager *mManager;
 	std::map<char, bool> keyMap;
 	InputManager();
+	float mouseX;
+	float mouseY;
 
 	public:
 		static InputManager *&getInstance();
 
-		virtual void handleInput(const char c, UINT state);
+		virtual void handleInput(WPARAM wParam, LPARAM lParam, UINT state);
 		bool getKeyState(const char c);
+
+		inline float getMouseX() { return this->mouseX; }
+		inline float getMouseY() { return this->mouseY; }
 };

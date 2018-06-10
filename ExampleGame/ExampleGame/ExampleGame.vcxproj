@@ -125,23 +125,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="D3DXGraphics.cpp" />
-    <ClCompile Include="GraphicsWindow.cpp" />
+    <ClCompile Include="DXGraphics.cpp" />
+    <ClCompile Include="DXExampleFactory.cpp" />
+    <ClCompile Include="ExampleWindow.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="D3DXPerspectiveCamera.cpp" />
+    <ClCompile Include="DXCamera.cpp" />
     <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="AbstractWindow.cpp" />
+    <ClCompile Include="BaseWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3DXGraphics.h" />
-    <ClInclude Include="ICamera.h" />
-    <ClInclude Include="IGraphics.h" />
-    <ClInclude Include="GraphicsWindow.h" />
-    <ClInclude Include="D3DXPerspectiveCamera.h" />
+    <ClInclude Include="BaseExampleFactory.h" />
+    <ClInclude Include="DXGraphics.h" />
+    <ClInclude Include="BaseCamera.h" />
+    <ClInclude Include="BaseGraphics.h" />
+    <ClInclude Include="DXExampleFactory.h" />
+    <ClInclude Include="ExampleWindow.h" />
+    <ClInclude Include="DXCamera.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="AbstractWindow.h" />
+    <ClInclude Include="BaseWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PShader.hlsl">

@@ -1,4 +1,5 @@
 #include "InputManager.h"
+#include <windowsx.h>
 
 InputManager *InputManager::mManager = 0;
 
@@ -16,15 +17,20 @@ InputManager *&InputManager::getInstance()
 	return mManager;
 }
 
-void InputManager::handleInput(const char c, UINT state)
+void InputManager::handleInput(WPARAM wParam, LPARAM lParam, UINT state)
 {
 	if (state == WM_KEYDOWN)
 	{
-		this->keyMap[c] = true;
+		this->keyMap[wParam] = true;
 	}
 	else if (state == WM_KEYUP)
 	{
-		this->keyMap[c] = false;
+		this->keyMap[wParam] = false;
+	}
+	else if (state == WM_MOUSEMOVE)
+	{
+		this->mouseX = GET_X_LPARAM(lParam);
+		this->mouseY = GET_Y_LPARAM(lParam);
 	}
 }
 

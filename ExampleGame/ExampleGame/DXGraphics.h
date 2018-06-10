@@ -1,14 +1,14 @@
-#ifndef D3DXGRAPHICS_H_DEFINED
-#define D3DXGRAPHICS_H_DEFINED
+#ifndef DXGraphics_H_DEFINED
+#define DXGraphics_H_DEFINED
 
-#include "IGraphics.h"
+#include "BaseGraphics.h"
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <vector>
 
 using namespace DirectX;
 
-class D3DXGraphics : public IGraphics {
+class DXGraphics : public BaseGraphics {
 	struct VS_CONSTANT_BUFFER
 	{
 		XMFLOAT4X4 worldViewProj;
@@ -42,12 +42,12 @@ class D3DXGraphics : public IGraphics {
 	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
-		D3DXGraphics(HWND hWnd, ICamera *camera);
+		DXGraphics(HWND hWnd);
 
 		void updateScene(HWND hWnd, MESH_DATA *bufferData, float angle);
 		void render();
 
-		~D3DXGraphics();
+		~DXGraphics();
 };
 
 #endif

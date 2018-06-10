@@ -1,17 +1,15 @@
 #pragma once
 
-#include "ICamera.h"
+#include "BaseCamera.h"
 
-class D3DXPerspectiveCamera : public ICamera
+class DXCamera : public BaseCamera
 {
 	protected:
 		float mWidth;
 		float mHeight;
 
-		void initActions();
-
 	public:
-		D3DXPerspectiveCamera(float width, float height);
+		DXCamera(int width, int height);
 
 		void strafe(int units);
 		void fly(int units);

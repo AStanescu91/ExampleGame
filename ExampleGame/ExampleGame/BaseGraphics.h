@@ -1,7 +1,7 @@
-#ifndef IGRAPHICS_H_DEFINED
-#define IGRAPHICS_H_DEFINED
+#ifndef BaseGraphics_H_DEFINED
+#define BaseGraphics_H_DEFINED
 
-#include "ICamera.h"
+#include "BaseCamera.h"
 #include <Windows.h>
 #include <DirectXMath.h>
 
@@ -24,18 +24,19 @@ typedef struct MESH_DATA
 		MESH_DATA(VERTEX *vertices, UINT *indices, int vCount, int iCount) : mVertices(vertices), mIndices(indices), mVCount(vCount), mICount(iCount) {};
 } MESH_DATA;
 
-class IGraphics 
+class BaseGraphics 
 {
 	protected:
-		ICamera *mCamera;
+		BaseCamera *mCamera;
 
 	public:	
-		IGraphics(ICamera *camera) : mCamera(camera) {}
+		BaseGraphics() {}
 
 		virtual void updateScene(HWND hWnd, MESH_DATA *bufferData, float angle) = 0;
 		virtual void render() = 0;
 
-		inline ICamera *getCamera() { return this->mCamera; }
+		inline BaseCamera *getCamera() { return this->mCamera; }
+		inline void setCamera(BaseCamera *&camera) { this->mCamera = camera; }
 };
 
 #endif

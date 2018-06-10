@@ -1,4 +1,4 @@
-#include "D3DXGraphics.h"
+#include "DXGraphics.h"
 #include "Utils.h"
 #include <DirectXMath.h>
 #include <vector>
@@ -9,13 +9,13 @@
 using namespace DirectX;
 using namespace std;
 
-D3DXGraphics::D3DXGraphics(HWND hWnd, ICamera *camera) : IGraphics(camera)
+DXGraphics::DXGraphics(HWND hWnd)
 {
 	this->mICount = 0;
 	initD3D(hWnd);
 }
 
-bool D3DXGraphics::initD3D(HWND hWnd) 
+bool DXGraphics::initD3D(HWND hWnd) 
 {
 	LPRECT winBounds = new RECT();
 	if (!GetWindowRect(hWnd, winBounds)) 
@@ -49,7 +49,7 @@ bool D3DXGraphics::initD3D(HWND hWnd)
 	return true;
 }
 
-bool D3DXGraphics::initDeviceAndSwapChain(HWND hWnd, int width, int height)
+bool DXGraphics::initDeviceAndSwapChain(HWND hWnd, int width, int height)
 {
 	DXGI_SWAP_CHAIN_DESC scd = {};
 	scd.BufferCount = 1;
@@ -71,7 +71,7 @@ bool D3DXGraphics::initDeviceAndSwapChain(HWND hWnd, int width, int height)
 	return true;
 }
 
-bool D3DXGraphics::initRenderTarget()
+bool DXGraphics::initRenderTarget()
 {
 	ID3D11Texture2D *pBackBuffer;
 	mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&pBackBuffer);
@@ -87,7 +87,7 @@ bool D3DXGraphics::initRenderTarget()
 	return true;
 }
 
-D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
+D3D11_VIEWPORT DXGraphics::getViewport(int width, int height)
 {
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
@@ -97,7 +97,7 @@ D3D11_VIEWPORT D3DXGraphics::getViewport(int width, int height)
 	return viewport;
 }
 
-void D3DXGraphics::updateBuffers(MESH_DATA *bufferData)
+void DXGraphics::updateBuffers(MESH_DATA *bufferData)
 {
 	mBufferData = bufferData;
 	if (this->mVBuffer != 0)
@@ -138,7 +138,7 @@ void D3DXGraphics::updateBuffers(MESH_DATA *bufferData)
 	mDev->CreateBuffer(&iBufferDesc, &iInitData, &mIBuffer);
 }
 
-bool D3DXGraphics::initShaders()
+bool DXGraphics::initShaders()
 {
 	// load and compile the two shaders
 	
@@ -167,7 +167,7 @@ bool D3DXGraphics::initShaders()
 	return true;
 }
 
-void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
+void DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 {
 	// create the input layout object
 	D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -180,7 +180,7 @@ void D3DXGraphics::createInputLayout(unsigned char *vShader, int vShaderSize)
 	mDevCon->IASetInputLayout(mLayout);
 }
 
-void D3DXGraphics::initConstantBuffer()
+void DXGraphics::initConstantBuffer()
 {
 	// Fill in a buffer description.
 	D3D11_BUFFER_DESC cbDesc;
@@ -195,7 +195,7 @@ void D3DXGraphics::initConstantBuffer()
 	mDev->CreateBuffer(&cbDesc, 0, &mCBuffer);
 }
 
-void D3DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
+void DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 {
 	D3D11_MAPPED_SUBRESOURCE ms;
 	mDevCon->Map(mCBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
@@ -203,10 +203,10 @@ void D3DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 	mDevCon->Unmap(mCBuffer, NULL);
 }
 
-XMMATRIX D3DXGraphics::createWorldViewProj(float angle)
+XMMATRIX DXGraphics::createWorldViewProj(float angle)
 {
 	float *camPos = this->mCamera->getPosition();
-	XMMATRIX rotate = DirectX::XMMatrixRotationZ(angle);
+	XMMATRIX rotate = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
 	XMMATRIX world = DirectX::XMMatrixTranslation(camPos[0], camPos[1], camPos[2]);
 	world = rotate * world;
 
@@ -215,7 +215,7 @@ XMMATRIX D3DXGraphics::createWorldViewProj(float angle)
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void D3DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
+void DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
 {	
 	XMMATRIX wvp = createWorldViewProj(angle);
 
@@ -234,7 +234,7 @@ void D3DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
 
 float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
 
-void D3DXGraphics::render() 
+void DXGraphics::render() 
 {
 	// clear the back buffer to a deep blue
 	mDevCon->ClearRenderTargetView(mBackBuffer, backColor);
@@ -256,7 +256,7 @@ void D3DXGraphics::render()
 	mSwapChain->Present(0, 0);
 }
 
-D3DXGraphics::~D3DXGraphics() {
+DXGraphics::~DXGraphics() {
 	mSwapChain->SetFullscreenState(FALSE, NULL);    // switch to windowed mode
 
 	mLayout->Release();
