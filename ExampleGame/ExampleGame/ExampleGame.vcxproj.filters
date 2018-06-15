@@ -22,9 +22,6 @@
     <ClCompile Include="DXGraphics.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="DXCamera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="DXExampleFactory.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -32,15 +29,15 @@
     <ClCompile Include="ExampleWindow.cpp">
       <Filter>Window</Filter>
     </ClCompile>
+    <ClCompile Include="DXPerspectiveCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseWindow.h">
       <Filter>Window</Filter>
     </ClInclude>
     <ClInclude Include="BaseCamera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="DXCamera.h">
       <Filter>Camera</Filter>
     </ClInclude>
     <ClInclude Include="BaseGraphics.h">
@@ -55,6 +52,12 @@
     <ClInclude Include="Utils.h" />
     <ClInclude Include="ExampleWindow.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="PerspectiveCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DXPerspectiveCamera.h">
+      <Filter>Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

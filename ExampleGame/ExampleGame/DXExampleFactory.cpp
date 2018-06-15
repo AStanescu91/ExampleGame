@@ -1,14 +1,14 @@
 #include "DXExampleFactory.h"
 #include "ExampleWindow.h"
 #include "DXGraphics.h"
-#include "DXCamera.h"
+#include "DXPerspectiveCamera.h"
 
 BaseGraphics *DXExampleFactory::createGraphics(HWND hWnd)
 {
 	return new DXGraphics(hWnd);
 }
 
-BaseCamera *DXExampleFactory::createCamera(UINT width, UINT height)
+PerspectiveCamera *DXExampleFactory::createPerspectiveCamera(float width, float height)
 {
-	return new DXCamera(width, height);
+	return new DXPerspectiveCamera(width, height);
 }

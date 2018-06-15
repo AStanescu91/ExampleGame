@@ -12,13 +12,22 @@ BaseWindow::BaseWindow(HINSTANCE hInstance, const char *className, const char *t
 
 LRESULT CALLBACK BaseWindow::staticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	BaseWindow* pParent;
+	BaseWindow* pParent = 0;
 
 	// Get pointer to window
 	if (message == WM_CREATE)
 	{
 		pParent = (BaseWindow *)((LPCREATESTRUCT)lParam)->lpCreateParams;
 		SetWindowLongPtr(hWnd,GWL_USERDATA, (LONG_PTR)pParent);
+	}
+	else if (message == WM_CLOSE)
+	{
+		DestroyWindow(hWnd);
+	}
+	else if (message == WM_DESTROY)
+	{
+		PostQuitMessage(WM_QUIT);
+		return 0;
 	}
 	else
 	{
@@ -27,7 +36,9 @@ LRESULT CALLBACK BaseWindow::staticWndProc(HWND hWnd, UINT message, WPARAM wPara
 			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
-	return pParent->wndProc(hWnd, message, wParam, lParam);
+	if (pParent)
+		return pParent->wndProc(hWnd, message, wParam, lParam);
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 LRESULT CALLBACK BaseWindow::wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {

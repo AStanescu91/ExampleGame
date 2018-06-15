@@ -1,6 +1,7 @@
 #include "BaseExampleFactory.h"
 #include "DXExampleFactory.h"
 #include "ExampleWindow.h"
+#include "DXPerspectiveCamera.h"
 #include "InputManager.h"
 #include <Windows.h>
 
@@ -14,19 +15,95 @@ BaseExampleFactory *&getFactory(std::string name)
 	return factory;
 }
 
+void processKeyboard(PerspectiveCamera *camera, HWND hWnd)
+{
+	InputManager *manager = InputManager::getInstance();
+	bool quitState = manager->getKeyState(VK_ESCAPE);
+	bool aState = manager->getKeyState('A');
+	bool dState = manager->getKeyState('D');
+	bool wState = manager->getKeyState('W');
+	bool sState = manager->getKeyState('S');
+	bool xState = manager->getKeyState('X');
+	bool spState = manager->getKeyState(VK_SPACE);
+
+	if (quitState)
+	{
+		PostMessage(hWnd, WM_CLOSE, 0, 0);
+	}
+
+	if (aState)
+	{
+		camera->strafe(-1);
+	}
+
+	if (dState)
+	{
+		camera->strafe(1);
+	}
+
+	if (wState)
+	{
+		camera->walk(1);
+	}
+
+	if (sState)
+	{
+		camera->walk(-1);
+	}
+
+	if (xState)
+	{
+		camera->fly(-1);
+	}
+
+	if (spState)
+	{
+		camera->fly(1);
+	}
+}
+
+void processMouse(PerspectiveCamera *camera)
+{
+	InputManager *manager = InputManager::getInstance();
+
+	const float divisor = 1000.0f;
+	camera->look(manager->getMouseY() / divisor, manager->getMouseX() / divisor, 0.0f);
+	manager->setMouseX(0);
+	manager->setMouseY(0);
+}
+
+void centerMouse(HWND hWnd)
+{
+	POINT pt = {};
+	RECT rect = {};
+	ClientToScreen(hWnd, &pt);
+	GetClientRect(hWnd, &rect);
+	float centerX = pt.x + (rect.right - rect.left) / 2.0f;
+	float centerY = pt.y + (rect.bottom - rect.top) / 2.0f;
+
+	SetCursorPos(centerX, centerY);
+}
+
+void processInput(PerspectiveCamera *camera, HWND hWnd)
+{
+	processKeyboard(camera, hWnd);
+	processMouse(camera);
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine, int nCmdShow) {
 	ExampleWindow window = ExampleWindow(hInstance, "WindowOne", "One");
-	int windowWidth = window.getBounds().right - window.getBounds().left;
-	int windowHeight = window.getBounds().bottom - window.getBounds().top;
+	float windowWidth = window.getBounds().right - window.getBounds().left;
+	float windowHeight = window.getBounds().bottom - window.getBounds().top;
+	ShowCursor(false);
 
 	BaseExampleFactory *factory = getFactory("dx");
 
 	BaseGraphics *graphics = factory->createGraphics(window.getHWnd());
 	window.setGraphics(graphics);
 
-	BaseCamera *camera = factory->createCamera(windowWidth, windowHeight);
+	PerspectiveCamera *camera = factory->createPerspectiveCamera(windowWidth, windowHeight);
+	camera->setPosition(0.0f, 0.0f, -10.0f);
 	graphics->setCamera(camera);
-	camera->setPosition(0.0f, 0.0f, 10.0f);
 
 	// create a triangle using the VERTEX struct
 	VERTEX vertices[] =
@@ -101,61 +178,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	MSG msg = {};
 	InputManager *manager = InputManager::getInstance();
+	manager->registerRawInput(window.getHWnd());
 
 	while (TRUE) {
-		bool quitState = manager->getKeyState(VK_ESCAPE);
-		bool aState = manager->getKeyState('A');
-		bool dState = manager->getKeyState('D');
-		bool wState = manager->getKeyState('W');
-		bool sState = manager->getKeyState('S');
-		bool xState = manager->getKeyState('X');
-		bool spState = manager->getKeyState(VK_SPACE);
+		processInput(camera, window.getHWnd());
+		centerMouse(window.getHWnd());
+		angle += 0.001f;
 
-		float *curPos = camera->getPosition();
-
-		if (quitState)
-		{
-			PostQuitMessage(0);
-		}
-
-		if (aState)
-		{
-			camera->setPosition(curPos[0] + 0.001f, curPos[1], curPos[2]);
-		}
-
-		if (dState)
-		{
-			camera->setPosition(curPos[0] - 0.001f, curPos[1], curPos[2]);
-		}
-
-		if (wState)
-		{
-			camera->setPosition(curPos[0], curPos[1], curPos[2] - 0.001f);
-		}
-
-		if (sState)
-		{
-			camera->setPosition(curPos[0], curPos[1], curPos[2] + 0.001f);
-		}
-
-		if (xState)
-		{
-			camera->setPosition(curPos[0], curPos[1] + 0.001f, curPos[2]);
-		}
-
-		if (spState)
-		{
-			camera->setPosition(curPos[0], curPos[1] - 0.001f, curPos[2]);
-		}
-
-		angle += 0.0001f;
-
+		camera->update();
 		window.updateScene(window.getHWnd(), data, angle);
 		window.render();
 
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
+			if (msg.message == WM_QUIT)
+			{
+				return 0;
+			}
 		}
 	}
 

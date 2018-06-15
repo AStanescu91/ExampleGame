@@ -206,12 +206,12 @@ void DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 XMMATRIX DXGraphics::createWorldViewProj(float angle)
 {
 	float *camPos = this->mCamera->getPosition();
-	XMMATRIX rotate = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
-	XMMATRIX world = DirectX::XMMatrixTranslation(camPos[0], camPos[1], camPos[2]);
-	world = rotate * world;
+	XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
+	//XMMATRIX world = DirectX::XMMatrixTranslation(camPos[0], camPos[1], camPos[2]);
+	//XMMATRIX world = DirectX::XMMatrixIdentity();
 
 	XMMATRIX viewProj = XMMATRIX(this->mCamera->getViewProjMatrix());
-	return DirectX::XMMatrixTranspose(world * viewProj);
+	return XMMatrixTranspose(world * viewProj);
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state

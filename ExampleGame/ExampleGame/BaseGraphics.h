@@ -36,7 +36,7 @@ class BaseGraphics
 		virtual void render() = 0;
 
 		inline BaseCamera *getCamera() { return this->mCamera; }
-		inline void setCamera(BaseCamera *&camera) { this->mCamera = camera; }
+		inline void setCamera(BaseCamera *camera) { this->mCamera = camera; }
 };
 
 #endif

@@ -6,5 +6,5 @@ class DXExampleFactory : public BaseExampleFactory
 {
 	public:
 		BaseGraphics *createGraphics(HWND hWnd);
-		BaseCamera *createCamera(UINT width, UINT height);
+		PerspectiveCamera *createPerspectiveCamera(float width, float height);
 };
