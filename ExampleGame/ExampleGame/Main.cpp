@@ -3,6 +3,7 @@
 #include "ExampleWindow.h"
 #include "DXPerspectiveCamera.h"
 #include "InputManager.h"
+#include <chrono>
 #include <Windows.h>
 
 BaseExampleFactory *&getFactory(std::string name)
@@ -66,7 +67,7 @@ void processMouse(PerspectiveCamera *camera)
 {
 	InputManager *manager = InputManager::getInstance();
 
-	const float divisor = 1000.0f;
+	const float divisor = 100.0f;
 	camera->look(manager->getMouseY() / divisor, manager->getMouseX() / divisor, 0.0f);
 	manager->setMouseX(0);
 	manager->setMouseY(0);
@@ -88,6 +89,17 @@ void processInput(PerspectiveCamera *camera, HWND hWnd)
 {
 	processKeyboard(camera, hWnd);
 	processMouse(camera);
+}
+
+void processFrame(PerspectiveCamera *camera, ExampleWindow window, MESH_DATA *data, float &angle)
+{
+	processInput(camera, window.getHWnd());
+	centerMouse(window.getHWnd());
+	angle += 0.01f;
+
+	camera->update();
+	window.updateScene(window.getHWnd(), data, angle);
+	window.render();
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -176,28 +188,36 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	MESH_DATA *data = new MESH_DATA(vertices, indices, 24, 36);
 
-	MSG msg = {};
+	MSG msg;
 	InputManager *manager = InputManager::getInstance();
 	manager->registerRawInput(window.getHWnd());
 
-	while (TRUE) {
-		processInput(camera, window.getHWnd());
-		centerMouse(window.getHWnd());
-		angle += 0.001f;
+	typedef std::chrono::high_resolution_clock Time;
+	typedef std::chrono::milliseconds ms;
+	typedef std::chrono::duration<float> fsec;
+	bool finished = false;
 
-		camera->update();
-		window.updateScene(window.getHWnd(), data, angle);
-		window.render();
-
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
+	while (!finished) {
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
 			if (msg.message == WM_QUIT)
 			{
-				return 0;
+				finished = true;
 			}
+
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
+		else
+		{
+			auto t0 = Time::now();
+			angle += 0.01f;
+			processFrame(camera, window, data, angle);
+			auto t1 = Time::now();
+			fsec fs = t0 - t1;
+			ms d = std::chrono::duration_cast<ms>(fs);
+			Sleep(16 + d.count());
+		}		
 	}
 
 	return 0;
