@@ -68,6 +68,8 @@ void InputManager::handleInput(WPARAM wParam, LPARAM lParam, UINT state)
 			this->mouseX = raw->data.mouse.lLastX;
 			this->mouseY = raw->data.mouse.lLastY;
 		}
+
+		delete[] lpb;
 	}
 }
 

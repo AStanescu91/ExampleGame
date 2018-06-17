@@ -9,9 +9,10 @@ ExampleWindow::ExampleWindow(HINSTANCE hInstance, UINT width, UINT height, const
 ExampleWindow::ExampleWindow(HINSTANCE hInstance, const char *className, const char *title) 
 	: ExampleWindow(hInstance, 800, 600, className, title) {}
 
-void ExampleWindow::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
+void ExampleWindow::updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed)
 {
-	this->mGraphics->updateScene(hWnd, bufferData, angle);
+	this->mGraphics->getCamera()->update();
+	this->mGraphics->updateScene(hWnd, bufferData, elapsed);
 }
 
 void ExampleWindow::render()

@@ -17,14 +17,14 @@ DXGraphics::DXGraphics(HWND hWnd)
 
 bool DXGraphics::initD3D(HWND hWnd) 
 {
-	LPRECT winBounds = new RECT();
-	if (!GetWindowRect(hWnd, winBounds)) 
+	RECT winBounds = RECT();
+	if (!GetWindowRect(hWnd, &winBounds)) 
 	{
 		return false;
 	}
 
-	int width = winBounds->bottom - winBounds->top;
-	int height = winBounds->right - winBounds->left;
+	int width = winBounds.bottom - winBounds.top;
+	int height = winBounds.right - winBounds.left;
 
 	if (!initDeviceAndSwapChain(hWnd, width, height))
 	{
@@ -205,19 +205,16 @@ void DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 
 XMMATRIX DXGraphics::createWorldViewProj(float angle)
 {
-	float *camPos = this->mCamera->getPosition();
-	XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
-	//XMMATRIX world = DirectX::XMMatrixTranslation(camPos[0], camPos[1], camPos[2]);
-	//XMMATRIX world = DirectX::XMMatrixIdentity();
+	//XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
 
 	XMMATRIX viewProj = XMMATRIX(this->mCamera->getViewProjMatrix());
-	return XMMatrixTranspose(world * viewProj);
+	return XMMatrixTranspose(viewProj);
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, float angle)
+void DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed)
 {	
-	XMMATRIX wvp = createWorldViewProj(angle);
+	XMMATRIX wvp = createWorldViewProj(0.0f);
 
 	VS_CONSTANT_BUFFER vsConstData = {};
 	DirectX::XMStoreFloat4x4(&vsConstData.worldViewProj, wvp);
@@ -267,4 +264,6 @@ DXGraphics::~DXGraphics() {
 	mBackBuffer->Release();
 	mDev->Release();
 	mDevCon->Release();
+
+	delete[] backColor;
 }

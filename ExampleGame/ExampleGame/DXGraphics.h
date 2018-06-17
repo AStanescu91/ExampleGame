@@ -44,7 +44,7 @@ class DXGraphics : public BaseGraphics {
 	public:
 		DXGraphics(HWND hWnd);
 
-		void updateScene(HWND hWnd, MESH_DATA *bufferData, float angle);
+		void updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed);
 		void render();
 
 		~DXGraphics();
