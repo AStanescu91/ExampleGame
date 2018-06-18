@@ -4,6 +4,7 @@
 #include "DXPerspectiveCamera.h"
 #include "InputManager.h"
 #include <Windows.h>
+#include <chrono>
 
 BaseExampleFactory *&getFactory(std::string name)
 {
@@ -181,6 +182,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 	manager->registerRawInput(window.getHWnd());
 
 	while (TRUE) {
+		std::chrono::duration<double> start = std::chrono::system_clock::now().time_since_epoch();
 		processInput(camera, window.getHWnd());
 		centerMouse(window.getHWnd());
 		angle += 0.001f;
@@ -198,6 +200,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 				return 0;
 			}
 		}
+		std::chrono::duration<double> end = std::chrono::system_clock::now().time_since_epoch();
+		Sleep(start.count + 16.0 - end.count);
 	}
 
 	return 0;

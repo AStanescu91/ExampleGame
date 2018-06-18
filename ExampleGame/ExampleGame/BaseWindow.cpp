@@ -18,7 +18,7 @@ LRESULT CALLBACK BaseWindow::staticWndProc(HWND hWnd, UINT message, WPARAM wPara
 	if (message == WM_CREATE)
 	{
 		pParent = (BaseWindow *)((LPCREATESTRUCT)lParam)->lpCreateParams;
-		SetWindowLongPtr(hWnd,GWL_USERDATA, (LONG_PTR)pParent);
+		SetWindowLongPtr(hWnd,GWLP_USERDATA, (LONG_PTR)pParent);
 	}
 	else if (message == WM_CLOSE)
 	{
@@ -31,7 +31,7 @@ LRESULT CALLBACK BaseWindow::staticWndProc(HWND hWnd, UINT message, WPARAM wPara
 	}
 	else
 	{
-		pParent = (BaseWindow *)GetWindowLongPtr(hWnd, GWL_USERDATA);
+		pParent = (BaseWindow *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 		if (!pParent) 
 			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
