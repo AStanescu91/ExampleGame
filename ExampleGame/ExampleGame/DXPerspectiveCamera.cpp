@@ -49,6 +49,7 @@ void DXPerspectiveCamera::look(float pitch, float yaw, float roll)
 	this->mLook = XMVector3TransformNormal(this->mLook, rotMat);
 	this->mUp = XMVector3TransformNormal(this->mUp, rotMat);
 
+
 	rotMat = XMMatrixRotationAxis(this->mUp, yaw);
 	this->mLook = XMVector3TransformNormal(this->mLook, rotMat);
 	this->mRight = XMVector3TransformNormal(this->mRight, rotMat);
@@ -67,9 +68,10 @@ void DXPerspectiveCamera::updatePosition(const DirectX::XMVECTOR &pos)
 void DXPerspectiveCamera::update()
 {
 	XMVECTOR pos = XMVectorSet(this->mPosition[0], this->mPosition[1], this->mPosition[2], 0.0f);
-
 	XMMATRIX view = XMMatrixLookAtLH(pos, pos + mLook, mUp);
 	XMMATRIX proj = view * XMMatrixPerspectiveFovLH(70.0f, this->mWidth / (float)this->mHeight, 1.0f, 1000.0f);
+
+	
 
 	XMFLOAT4X4 tmp;
 	XMStoreFloat4x4(&tmp, proj);

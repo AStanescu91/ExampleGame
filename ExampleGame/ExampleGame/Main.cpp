@@ -3,8 +3,9 @@
 #include "ExampleWindow.h"
 #include "DXPerspectiveCamera.h"
 #include "InputManager.h"
-#include <Windows.h>
 #include <chrono>
+#include <ratio>
+#include <Windows.h>
 
 BaseExampleFactory *&getFactory(std::string name)
 {
@@ -90,6 +91,10 @@ void processInput(PerspectiveCamera *camera, HWND hWnd)
 	processKeyboard(camera, hWnd);
 	processMouse(camera);
 }
+
+typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::milliseconds ms;
+typedef std::chrono::duration<float> fsec;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine, int nCmdShow) {
 	ExampleWindow window = ExampleWindow(hInstance, "WindowOne", "One");
@@ -177,31 +182,40 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	MESH_DATA *data = new MESH_DATA(vertices, indices, 24, 36);
 
-	MSG msg = {};
+	MSG msg;
 	InputManager *manager = InputManager::getInstance();
 	manager->registerRawInput(window.getHWnd());
 
-	while (TRUE) {
-		std::chrono::duration<double> start = std::chrono::system_clock::now().time_since_epoch();
-		processInput(camera, window.getHWnd());
-		centerMouse(window.getHWnd());
-		angle += 0.001f;
+	bool finished = false;
+	auto tLast = Time::now();
 
-		camera->update();
-		window.updateScene(window.getHWnd(), data, angle);
-		window.render();
+	const int MS_PER_FRAME = 16;
 
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-
+	while (!finished) {
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
 			if (msg.message == WM_QUIT)
 			{
-				return 0;
+				delete data;			
+				delete graphics;
+				delete camera;
+				delete factory;
+				finished = true;
 			}
+
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-		std::chrono::duration<double> end = std::chrono::system_clock::now().time_since_epoch();
-		Sleep(start.count + 16.0 - end.count);
+		else
+		{
+			auto tNow = Time::now();
+			std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::milliseconds>(tNow - tLast);
+			processInput(camera, window.getHWnd());
+			window.updateScene(window.getHWnd(), data, 0.0f);
+			window.render();
+			tLast = tNow;
+			centerMouse(window.getHWnd());
+		}		
 	}
 
 	return 0;

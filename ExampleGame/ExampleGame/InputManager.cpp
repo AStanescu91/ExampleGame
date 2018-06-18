@@ -23,7 +23,7 @@ void InputManager::registerRawInput(HWND hWnd)
 
 	rid[0].usUsagePage = 0x01;
 	rid[0].usUsage = 0x02;
-	rid[0].dwFlags = RIDEV_NOLEGACY;
+	rid[0].dwFlags = RIDEV_NOLEGACY | RIDEV_CAPTUREMOUSE;
 	rid[0].hwndTarget = hWnd;
 
 	rid[1].usUsagePage = 0x01;
@@ -68,6 +68,8 @@ void InputManager::handleInput(WPARAM wParam, LPARAM lParam, UINT state)
 			this->mouseX = raw->data.mouse.lLastX;
 			this->mouseY = raw->data.mouse.lLastY;
 		}
+
+		delete[] lpb;
 	}
 }
 

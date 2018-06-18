@@ -23,4 +23,9 @@ class InputManager
 
 		inline void setMouseX(int mouseX) { this->mouseX = mouseX; }
 		inline void setMouseY(int mouseY) { this->mouseY = mouseY; }
+
+		~InputManager()
+		{
+			delete mManager;
+		}
 };
