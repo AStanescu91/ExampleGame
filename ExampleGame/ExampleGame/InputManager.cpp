@@ -65,8 +65,8 @@ void InputManager::handleInput(WPARAM wParam, LPARAM lParam, UINT state)
 		}
 		else if (raw->header.dwType == RIM_TYPEMOUSE)
 		{
-			this->mouseX = raw->data.mouse.lLastX;
-			this->mouseY = raw->data.mouse.lLastY;
+			this->mouseX += raw->data.mouse.lLastX;
+			this->mouseY += raw->data.mouse.lLastY;
 		}
 
 		delete[] lpb;
