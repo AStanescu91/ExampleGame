@@ -193,7 +193,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 	auto tLast = Time::now();
 	double lag = 0.0;
 
-	const int MS_PER_FRAME = 16;
+	const int MS_PER_UPDATE = 5;
 
 	while (!finished) {
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -220,13 +220,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 			processInput(window, camera, window.getHWnd());
 
-			while (lag >= 5)
+			while (lag >= MS_PER_UPDATE)
 			{
 				window.updateScene();
-				lag -= 5;
+				lag -= MS_PER_UPDATE;
 			}
 
-			window.render(bufferData, lag / 5);
+			window.render(bufferData, lag / MS_PER_UPDATE);
 		}		
 	}
 

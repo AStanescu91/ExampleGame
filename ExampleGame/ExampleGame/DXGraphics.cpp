@@ -208,8 +208,8 @@ float globalAngle = 0.0f;
 XMMATRIX DXGraphics::createWorldViewProj()
 {
 	XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(globalAngle, globalAngle, globalAngle);
-	XMMATRIX viewProj = world * XMMATRIX(this->mCamera->getViewProjMatrix());
-	return XMMatrixTranspose(viewProj);
+	XMMATRIX viewProj = XMMATRIX(this->mCamera->getViewProjMatrix());
+	return XMMatrixTranspose(world * viewProj);
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state

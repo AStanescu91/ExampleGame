@@ -11,7 +11,6 @@ ExampleWindow::ExampleWindow(HINSTANCE hInstance, const char *className, const c
 
 void ExampleWindow::updateScene()
 {
-	this->mGraphics->getCamera()->update();
 	this->mGraphics->updateScene();
 }
 

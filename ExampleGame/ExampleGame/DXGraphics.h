@@ -14,6 +14,8 @@ class DXGraphics : public BaseGraphics {
 		XMFLOAT4X4 worldViewProj;
 	};
 
+	XMMATRIX mWVP;
+
 	MESH_DATA *mBufferData;
 
 	ID3D11Device *mDev;
