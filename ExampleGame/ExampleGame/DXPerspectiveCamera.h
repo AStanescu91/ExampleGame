@@ -4,6 +4,10 @@
 
 class DXPerspectiveCamera : public PerspectiveCamera
 {
+	float mYaw;
+	float mPitch;
+	float mRoll;
+
 	DirectX::XMVECTOR mRight;
 	DirectX::XMVECTOR mUp;
 	DirectX::XMVECTOR mLook;	

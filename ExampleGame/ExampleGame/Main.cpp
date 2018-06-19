@@ -6,6 +6,7 @@
 #include <chrono>
 #include <ratio>
 #include <Windows.h>
+#include <string>
 
 BaseExampleFactory *&getFactory(std::string name)
 {
@@ -208,13 +209,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 		}
 		else
 		{
-			auto tNow = Time::now();
-			std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::milliseconds>(tNow - tLast);
+			auto tLast = Time::now();
 			processInput(camera, window.getHWnd());
 			window.updateScene(window.getHWnd(), data, 0.0f);
 			window.render();
-			tLast = tNow;
 			centerMouse(window.getHWnd());
+
+			auto tNow = Time::now();
+			std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::milliseconds>(tNow - tLast);
+			Sleep(16 + time_span.count());
 		}		
 	}
 
