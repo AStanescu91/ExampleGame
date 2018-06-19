@@ -34,18 +34,19 @@ class DXGraphics : public BaseGraphics {
 	bool initDeviceAndSwapChain(HWND hWnd, int width, int height);
 	bool initRenderTarget();
 	void createInputLayout(unsigned char *vShader, int vShaderSize);
-	void updateBuffers(MESH_DATA *bufferData);
+	void updateBuffers(MESH_DATA *&bufferData);
 	bool initShaders();
 	void initConstantBuffer();
-	XMMATRIX createWorldViewProj(float angle);
+	void fillConstantBuffers(MESH_DATA *&bufferData);
+	XMMATRIX createWorldViewProj();
 	void updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData);
 	D3D11_VIEWPORT getViewport(int width, int height);
 
 	public:
 		DXGraphics(HWND hWnd);
 
-		void updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed);
-		void render();
+		void updateScene();
+		void render(MESH_DATA *&bufferData, float lag);
 
 		~DXGraphics();
 };

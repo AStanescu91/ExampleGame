@@ -9,15 +9,15 @@ ExampleWindow::ExampleWindow(HINSTANCE hInstance, UINT width, UINT height, const
 ExampleWindow::ExampleWindow(HINSTANCE hInstance, const char *className, const char *title) 
 	: ExampleWindow(hInstance, 800, 600, className, title) {}
 
-void ExampleWindow::updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed)
+void ExampleWindow::updateScene()
 {
 	this->mGraphics->getCamera()->update();
-	this->mGraphics->updateScene(hWnd, bufferData, elapsed);
+	this->mGraphics->updateScene();
 }
 
-void ExampleWindow::render()
+void ExampleWindow::render(MESH_DATA *&bufferData, float lag)
 {
-	this->mGraphics->render();
+	this->mGraphics->render(bufferData, lag);
 }
 
 LRESULT CALLBACK ExampleWindow::wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

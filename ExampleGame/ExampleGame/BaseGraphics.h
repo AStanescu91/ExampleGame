@@ -32,8 +32,8 @@ class BaseGraphics
 	public:	
 		BaseGraphics() {}
 
-		virtual void updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed) = 0;
-		virtual void render() = 0;
+		virtual void updateScene() = 0;
+		virtual void render(MESH_DATA *&bufferData, float lag) = 0;
 
 		inline BaseCamera *getCamera() { return this->mCamera; }
 		inline void setCamera(BaseCamera *camera) { this->mCamera = camera; }

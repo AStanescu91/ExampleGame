@@ -87,10 +87,12 @@ void centerMouse(HWND hWnd)
 	SetCursorPos(centerX, centerY);
 }
 
-void processInput(PerspectiveCamera *camera, HWND hWnd)
+void processInput(ExampleWindow &window, PerspectiveCamera *camera, HWND hWnd)
 {
 	processKeyboard(camera, hWnd);
 	processMouse(camera);
+
+	centerMouse(window.getHWnd());
 }
 
 typedef std::chrono::high_resolution_clock Time;
@@ -181,7 +183,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	float angle = 0.0f;
 
-	MESH_DATA *data = new MESH_DATA(vertices, indices, 24, 36);
+	MESH_DATA *bufferData = new MESH_DATA(vertices, indices, 24, 36);
 
 	MSG msg;
 	InputManager *manager = InputManager::getInstance();
@@ -189,6 +191,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 
 	bool finished = false;
 	auto tLast = Time::now();
+	double lag = 0.0;
 
 	const int MS_PER_FRAME = 16;
 
@@ -197,7 +200,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 		{
 			if (msg.message == WM_QUIT)
 			{
-				delete data;			
+				delete bufferData;			
 				delete graphics;
 				delete camera;
 				delete factory;
@@ -209,15 +212,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrvInstance, LPSTR lpCmdLine,
 		}
 		else
 		{
-			auto tLast = Time::now();
-			processInput(camera, window.getHWnd());
-			window.updateScene(window.getHWnd(), data, 0.0f);
-			window.render();
-			centerMouse(window.getHWnd());
-
 			auto tNow = Time::now();
 			std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::milliseconds>(tNow - tLast);
-			Sleep(16 + time_span.count());
+			double elapsed = time_span.count();
+			tLast = tNow;
+			lag += elapsed;
+
+			processInput(window, camera, window.getHWnd());
+
+			while (lag >= 5)
+			{
+				window.updateScene();
+				lag -= 5;
+			}
+
+			window.render(bufferData, lag / 5);
 		}		
 	}
 

@@ -97,9 +97,9 @@ D3D11_VIEWPORT DXGraphics::getViewport(int width, int height)
 	return viewport;
 }
 
-void DXGraphics::updateBuffers(MESH_DATA *bufferData)
+void DXGraphics::updateBuffers(MESH_DATA *&bufferData)
 {
-	mBufferData = bufferData;
+	this->mBufferData = bufferData;
 	if (this->mVBuffer != 0)
 		this->mVBuffer->Release();
 
@@ -203,18 +203,26 @@ void DXGraphics::updateConstantBuffer(VS_CONSTANT_BUFFER vsConstData)
 	mDevCon->Unmap(mCBuffer, NULL);
 }
 
-XMMATRIX DXGraphics::createWorldViewProj(float angle)
-{
-	//XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(angle, angle, angle);
+float globalAngle = 0.0f;
 
-	XMMATRIX viewProj = XMMATRIX(this->mCamera->getViewProjMatrix());
+XMMATRIX DXGraphics::createWorldViewProj()
+{
+	XMMATRIX world = DirectX::XMMatrixRotationRollPitchYaw(globalAngle, globalAngle, globalAngle);
+	XMMATRIX viewProj = world * XMMATRIX(this->mCamera->getViewProjMatrix());
 	return XMMatrixTranspose(viewProj);
 }
 
 //Instead of vbuffer, ibuffer, we pass in list of objects and their state
-void DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed)
+void DXGraphics::updateScene()
 {	
-	XMMATRIX wvp = createWorldViewProj(0.0f);
+	globalAngle += (1.0f / 1000.0f);
+}
+
+float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
+
+void DXGraphics::fillConstantBuffers(MESH_DATA *&bufferData)
+{
+	XMMATRIX wvp = createWorldViewProj();
 
 	VS_CONSTANT_BUFFER vsConstData = {};
 	DirectX::XMStoreFloat4x4(&vsConstData.worldViewProj, wvp);
@@ -222,17 +230,16 @@ void DXGraphics::updateScene(HWND hWnd, MESH_DATA *bufferData, double elapsed)
 	//update per object
 	this->updateConstantBuffer(vsConstData);
 
-	if (bufferData != this->mBufferData)
-	{
-		this->updateBuffers(bufferData);
-		this->mICount = bufferData->mICount;
-	}	
+	this->updateBuffers(bufferData);
+	this->mICount = bufferData->mICount;
 }
 
-float *backColor = new float[4]{ 0.0f, 0.2f, 0.4f, 1.0f };
-
-void DXGraphics::render() 
+void DXGraphics::render(MESH_DATA *&bufferData, float lag) 
 {
+	globalAngle += (1.0f / 1000.0f) * lag;
+
+	fillConstantBuffers(bufferData);
+
 	// clear the back buffer to a deep blue
 	mDevCon->ClearRenderTargetView(mBackBuffer, backColor);
 
